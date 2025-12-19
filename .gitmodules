@@ -1,0 +1,3 @@
+[submodule "Traffic-oracle"]
+	path = Traffic-oracle
+	url = https://github.com/Nitesh0986/Traffic-oracle.git
