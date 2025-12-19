@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmo Hach Phase1 - Traffic Prediction</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Leaflet.js CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+    <div class="main-container">
+        <header class="header">
+            <h1><i class="fas fa-traffic-light"></i> Traffic Prediction System</h1>
+            <div class="university-name">CosmoHack-2025 </div>
+        </header>
+
+        <div class="content-wrapper">
+            <div class="input-panel">
+                <div class="form-section">
+                    <h2><i class="fas fa-calendar-alt"></i> Date & Time</h2>
+                    <div class="date-time-group">
+                        <div class="input-group">
+                            <label><i class="fas fa-calendar"></i> Date</label>
+                            <input type="date" id="date" value="2025-01-09">
+                        </div>
+                        <div class="input-group">
+                            <label><i class="fas fa-clock"></i> Time</label>
+                            <input type="time" id="time" value="21:27">
+                        </div>
+                        <div class="input-group">
+                            <label><i class="fas fa-calendar-day"></i> Day</label>
+                            <div class="day-display" id="dayDisplay">Thursday</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2><i class="fas fa-route"></i> Route Details</h2>
+                    
+                   
+                    <div id="citySuggestions" style="margin-bottom: 10px; min-height: 20px;"></div>
+                    
+                    <div class="input-group">
+                        <label><i class="fas fa-map-marker-alt"></i> From Location</label>
+                        <input type="text" id="fromLocation" placeholder="Enter starting point">
+                    </div>
+                    <div class="input-group">
+                        <label><i class="fas fa-flag-checkered"></i> To Location</label>
+                        <input type="text" id="toLocation" placeholder="Enter destination">
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2><i class="fas fa-cloud-sun"></i> Weather Conditions</h2>
+                    <div class="weather-inputs">
+                        <div class="input-group">
+                            <label><i class="fas fa-thermometer-half"></i> Temperature (°C)</label>
+                            <input type="number" id="temperature" placeholder="Enter temperature" value="25">
+                        </div>
+                        <div class="input-group">
+                            <label><i class="fas fa-umbrella-beach"></i> Is Holiday?</label>
+                            <select id="isHoliday">
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label><i class="fas fa-cloud"></i> Climate Condition</label>
+                            <select id="climateCondition">
+                                <option value="Clear">Clear</option>
+                                <option value="Clouds">Cloudy</option>
+                                <option value="Rain">Rain</option>
+                                <option value="Snow">Snow</option>
+                                <option value="Fog">Fog</option>
+                                <option value="Squalls" selected>Squalls</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    
+                    <button class="location-btn" id="liveLocationBtn" style="margin-top: 15px; width: 100%;">
+                        <i class="fas fa-location-dot"></i> SHOW LIVE LOCATION COORDINATES
+                    </button>
+                    
+                    
+                    <div id="locationMessage" style="display: none; margin-top: 15px;"></div>
+                </div>
+
+                <button class="predict-btn" id="predictBtn">
+                    <i class="fas fa-bolt"></i> PREDICT TRAFFIC
+                </button>
+                
+                
+                <button class="sample-btn" onclick="loadSampleData()" style="margin-top: 15px; background: #f0f9ff; color: #0284c7; border: 2px dashed #0284c7;">
+                    <i class="fas fa-vial"></i> TRY SAMPLE ROUTE
+                </button>
+            </div>
+            <div class="results-panel">
+                <div class="weather-display">
+                    <h2><i class="fas fa-cloud-sun-rain"></i> Weather Description</h2>
+                    <div class="weather-card" id="weatherCard">
+                        <div class="weather-icon">
+                            <i class="fas fa-sun fa-3x"></i>
+                        </div>
+                        <div class="weather-info">
+                            <h3>ENTER LOCATION</h3>
+                            <p>Weather data will appear here</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="prediction-result">
+                    <h2><i class="fas fa-chart-line"></i> Predicted Output</h2>
+                    <div class="traffic-prediction" id="trafficPrediction">
+                        <div style="text-align: center; padding: 30px; color: #666;">
+                            <i class="fas fa-map-marked-alt fa-3x" style="color: #3b82f6; margin-bottom: 15px;"></i>
+                            <h3>Welcome to Traffic Predictor</h3>
+                             <p>Enter your origin and destination to get traffic predictions</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Map Container -->
+                <div class="map-container">
+                    <h2><i class="fas fa-map-marked-alt"></i> Route Visualization</h2>
+                    
+                   
+                    <div id="welcomeMessage" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; width: 80%;">
+                        <i class="fas fa-map-marked-alt fa-3x" style="color: #3b82f6; margin-bottom: 15px;"></i>
+                        <h3>Interactive Maps Ready</h3>
+                        <p>Enter locations to visualize your route</p>
+                        <button onclick="loadSampleData()" style="background: #3b82f6; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-top: 10px;">
+                            <i class="fas fa-vial"></i> Try Sample Route
+                        </button>
+                    </div>
+                    
+                    <div class="dual-maps">
+                        <div class="map-section">
+                            <h3><i class="fas fa-traffic-light"></i> Current Route</h3>
+                            <div id="currentRouteMap"></div>
+                            <div class="map-info">
+                                <p><i class="fas fa-info-circle"></i> Shows main route with traffic prediction</p>
+                            </div>
+                        </div>
+                        <div class="map-section">
+                            <h3><i class="fas fa-route"></i> Alternative Route</h3>
+                            <div id="alternativeRouteMap"></div>
+                            <div class="map-info">
+                                <p><i class="fas fa-info-circle"></i> Less traffic alternative route</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alternative-routes">
+                    <h2><i class="fas fa-route"></i> Alternative Routes</h2>
+                    <div class="routes-list" id="routesList">
+                        <div class="route-item">
+                            <i class="fas fa-route"></i>
+                            <span>Alternative routes will appear here</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="details-grid">
+                    <div class="detail-card">
+                        <i class="fas fa-road"></i>
+                        <h4>Distance</h4>
+                        <p id="distance">-- km</p>
+                    </div>
+                    <div class="detail-card">
+                        <i class="fas fa-clock"></i>
+                        <h4>Duration</h4>
+                        <p id="duration">-- mins</p>
+                    </div>
+                    <div class="detail-card">
+                        <i class="fas fa-car"></i>
+                        <h4>Traffic Level</h4>
+                        <p id="trafficLevel">--</p>
+                    </div>
+                    <div class="detail-card">
+                        <i class="fas fa-gas-pump"></i>
+                        <h4>Fuel Estimate</h4>
+                        <p id="fuelEstimate">-- L</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="live-info">
+            <div class="live-item">
+                <i class="fas fa-satellite"></i>
+                <span>Leaflet.js Maps </span>
+            </div>
+            <div class="live-item">
+                <i class="fas fa-thermometer-three-quarters"></i>
+                <span>Simulated Weather Data</span>
+            </div>
+            <div class="live-item">
+                <i class="fas fa-brain"></i>
+                <span>AI-Powered Predictions</span>
+            </div>
+            <!-- Database status -->
+            <div class="live-item">
+                <i class="fas fa-database"></i>
+                <span>Local Database: 100+ Indian Cities</span>
+            </div>
+            <!-- NEW: Live Location Status -->
+            <div class="live-item">
+                <i class="fas fa-location-dot"></i>
+                <span>Live Location Available</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
